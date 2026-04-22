@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app)
 
 # MongoDB connection
-client = MongoClient("mongodb+srv://chanchalmalik1214_db_user:kG6Rb6U7LFOnnMIu@cluster.ymawgpb.mongodb.net/newsletter_db")
+client = MongoClient("mongodb+srv://chanchalmalik1214_db_user:kG6Rb6U7LFOnnMIu@cluster.ymawgpb.mongodb.net/?appName=Cluster.mongodb.net/newsletter_db")
 db = client["newsletter_db"]
 users_collection = db["users"]
 
@@ -23,11 +23,18 @@ def signup():
     data = request.json
     email = data.get("email")
 
+    # 🔍 Check if user already exists
+    existing_user = users_collection.find_one({"email": email})
+
+    if existing_user:
+        return jsonify({"message": "User already exists"}), 400
+
+    # ✅ If new user
     user = {
-    "email": email,
-    "signup_date": datetime.now(),
-    "last_sent": None
-}
+        "email": email,
+        "signup_date": datetime.now(),
+        "last_sent": None
+    }
 
     users_collection.insert_one(user)
 
@@ -38,6 +45,7 @@ def signup():
 
 @app.route("/users", methods=["GET"])
 def get_users():
+    users = list(users_collection.find({}, {"_id": 0}))
     return jsonify(users)
 def send_email(to_email):
     sender_email = "your_real_email@gmail.com"

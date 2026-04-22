@@ -1,9 +1,16 @@
+import Sidebar from "./components/Sidebar";
+import Navbar from "./components/Navbar";
+import Dashboard from "./components/Dashboard";
+
 function App() {
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-900">
-      <h1 className="text-4xl text-blue-500 font-bold">
-        Tailwind Working 🚀
-      </h1>
+    <div className="flex">
+      <Sidebar />
+
+      <div className="flex-1 bg-gray-100 min-h-screen">
+        <Navbar />
+        <Dashboard />
+      </div>
     </div>
   );
 }
