@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app)
 
 # MongoDB connection
-client = MongoClient("mongodb+srv://chanchalmalik1214_db_user:kG6Rb6U7LFOnnMIu@cluster.ymawgpb.mongodb.net/?appName=Cluster.mongodb.net/newsletter_db")
+client = MongoClient("mongodb+srv://chanchalmalik1214_db_user:kG6Rb6U7LFOnnMIu@cluster.ymawgpb.mongodb.net/newsletter_db")
 db = client["newsletter_db"]
 users_collection = db["users"]
 
@@ -18,18 +18,19 @@ users_collection = db["users"]
 def home():
     return "Backend is running 🚀"
 
-@app.route("/signup", methods=["POST"])
+@app.route("/signup", methods=["POST", "OPTIONS"])
 def signup():
+    if request.method == "OPTIONS":
+        return jsonify({"message": "OK"}), 200
+
     data = request.json
     email = data.get("email")
 
-    # 🔍 Check if user already exists
+    # Check duplicate
     existing_user = users_collection.find_one({"email": email})
-
     if existing_user:
         return jsonify({"message": "User already exists"}), 400
 
-    # ✅ If new user
     user = {
         "email": email,
         "signup_date": datetime.now(),
@@ -94,6 +95,12 @@ def send_newsletter():
                 {"email": user["email"]},
                 {"$set": {"last_sent": today}}
             )
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    return response
 
 # Start scheduler
 scheduler = BackgroundScheduler()
