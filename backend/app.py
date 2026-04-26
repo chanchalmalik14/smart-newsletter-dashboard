@@ -7,7 +7,11 @@ import smtplib
 from email.mime.text import MIMEText
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={
+    r"/*": {
+        "origins": ["http://localhost:3000", "http://127.0.0.1:3000"]
+    }
+})
 
 # MongoDB connection
 client = MongoClient("mongodb+srv://chanchalmalik1214_db_user:kG6Rb6U7LFOnnMIu@cluster.ymawgpb.mongodb.net/newsletter_db")
@@ -20,13 +24,15 @@ def home():
 
 @app.route("/signup", methods=["POST", "OPTIONS"])
 def signup():
+    print("Signup API HIT")
     if request.method == "OPTIONS":
-        return jsonify({"message": "OK"}), 200
+        return "", 200
+
+    print("Signup API HIT")  # DEBUG
 
     data = request.json
     email = data.get("email")
 
-    # Check duplicate
     existing_user = users_collection.find_one({"email": email})
     if existing_user:
         return jsonify({"message": "User already exists"}), 400
@@ -41,7 +47,6 @@ def signup():
 
     return jsonify({
         "message": "User added successfully",
-        "user": user
     })
 
 @app.route("/users", methods=["GET"])
@@ -97,9 +102,9 @@ def send_newsletter():
             )
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    response.headers["Access-Control-Allow-Origin"] = "http://localhost:3000"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
+    response.headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS"
     return response
 
 # Start scheduler

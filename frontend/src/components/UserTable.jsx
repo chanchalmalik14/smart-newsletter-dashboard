@@ -14,8 +14,8 @@ export default function UserTable({ users }) {
           {users.map((user, i) => (
             <tr key={i} className="border-b">
               <td className="p-2">{user.email}</td>
-              <td className="p-2">{user.signup_date}</td>
-              <td className="p-2">{user.last_sent || "Not Sent"}</td>
+              <td className="p-2">{new Date(user.signup_date).toLocaleString()}</td>
+              <td className="p-2">{user.last_sent ? new Date(user.last_sent).toLocaleString() : "Not Sent"}</td>
             </tr>
           ))}
         </tbody>
